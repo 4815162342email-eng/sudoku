@@ -184,7 +184,7 @@ td{font-variant-numeric:tabular-nums;font-weight:700}
     <div class="card">
      <h2 id="h-size">Размер поля</h2>
      <div class="opts cols2 js-sizes" role="radiogroup" aria-labelledby="h-size"></div>
-     <p class="lock-note" id="lock-note" hidden>Режим 9×9 откроется после 10 побед в 6×6.</p>
+     <p class="lock-note" id="lock-note" hidden>Режим 9×9 откроется после 5 побед в 6×6.</p>
     </div>
     <div class="card">
      <h2 id="h-diff">Сложность</h2>
@@ -200,7 +200,7 @@ td{font-variant-numeric:tabular-nums;font-weight:700}
      <h2>Путь к режиму 9×9</h2>
      <p class="prog-count" id="prog-count"></p>
      <p class="prog-left" id="prog-left"></p>
-     <div class="bar" id="prog-bar" role="progressbar" aria-label="Прогресс открытия режима 9×9" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><i id="prog-fill"></i></div>
+     <div class="bar" id="prog-bar" role="progressbar" aria-label="Прогресс открытия режима 9×9" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><i id="prog-fill"></i></div>
     </div>
     <div class="card">
      <h2>Твои успехи</h2>
@@ -295,7 +295,7 @@ const KEY='sudoku-kids-progress-v1';
 const SIZES=[6,9];
 const DIFFS=[{id:'easy',name:'Лёгкий'},{id:'medium',name:'Средний'},{id:'hard',name:'Сложный'}];
 const CLUES={6:{easy:22,medium:17,hard:13},9:{easy:40,medium:33,hard:27}};
-const UNLOCK_WINS=10;
+const UNLOCK_WINS=5;
 const MAX_GEN_MS=6000;
 const modeKey=(n,d)=>n+'-'+d;
 const MODE_KEYS=[];
@@ -680,7 +680,7 @@ function updateSelectors(){
     b.classList.toggle('active',n===S.size&&!locked);
     b.setAttribute('aria-disabled',locked?'true':'false');
     b.setAttribute('aria-checked',(n===S.size&&!locked)?'true':'false');
-    b.setAttribute('aria-label',n+'×'+n+(locked?', закрыто. Откроется после 10 побед в 6×6':''));
+    b.setAttribute('aria-label',n+'×'+n+(locked?', закрыто. Откроется после '+UNLOCK_WINS+' '+plural(UNLOCK_WINS,['победы','побед','побед'])+' в 6×6':''));
     const main=$('.opt-main',b);
     main.innerHTML=(locked?'<span class="lock" aria-hidden="true"></span>':'')+n+'×'+n;
     $('.opt-sub',b).textContent=locked?'Закрыто':(n===6?'блоки 2×3':'блоки 3×3');
@@ -710,7 +710,7 @@ function renderHome(){
   $('#prog-count').textContent=P.unlocked9?'Режим 9×9 открыт!':'Решено '+w+' из '+UNLOCK_WINS+' игр';
   $('#prog-left').textContent=P.unlocked9?'Он останется доступным навсегда.':
     (left===1?'До открытия 9×9 осталась 1 победа':'До открытия 9×9 осталось '+left+' '+plural(left,['победа','победы','побед']));
-  $('#prog-fill').style.width=(P.unlocked9?100:w*10)+'%';
+  $('#prog-fill').style.width=(P.unlocked9?100:Math.round(w*100/UNLOCK_WINS))+'%';
   $('#prog-bar').setAttribute('aria-valuenow',String(P.unlocked9?UNLOCK_WINS:w));
   $('#hs-total').textContent=P.total;
   $('#hs-streak').textContent=P.streak;
@@ -886,7 +886,7 @@ async function handleWin(g){
     Sound.play('unlock');confetti(true);
     await Modal.show({
       kind:'unlock',icon:'9×9',title:'Открыт режим 9×9!',
-      lines:['10 судоку 6×6 решено! Теперь тебе доступны поля побольше.'],
+      lines:[UNLOCK_WINS+' судоку 6×6 решено! Теперь тебе доступны поля побольше.'],
       buttons:[{label:'Ура!',value:true,primary:true}]
     });
   }
